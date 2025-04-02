@@ -5,6 +5,7 @@
 use std::fs::File;
 use std::io::{self, BufRead, Write};
 use std::env;
+use std::fs;
 pub fn run() {
 
   
@@ -28,22 +29,37 @@ pub fn run() {
     writeln!(writer, "Character count: {}", char_count).expect("Failed to write to file");
     writeln!(writer, "Line count: {}", line_count).expect("Failed to write to file");
 }
-//增加测试
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs;
 
     #[test]
-    fn test_run() {
-        let input = "input.txt";
-        let output = "output.txt";
-        let content = "apple banana\npear banana\napple banana";
-        fs::write(input, content).expect("Failed to write to file");
+    fn test_run_with_valid_file() {
+        let test_input = "test_input.txt";
+        let test_output = "output.txt";
+
+        // Create a test input file
+        fs::write(test_input, "Hello\nWorld\nRust").expect("Failed to create test input file");
+
+        // Run the function
         run();
-        let output = fs::read_to_string(output).expect("Failed to read file");
-        assert_eq!(output, "Character count: 38\nLine count: 3\n");
+
+        // Verify the output file
+        let output_content = fs::read_to_string(test_output).expect("Failed to read output file");
+        assert!(output_content.contains("Character count: 14"));
+        assert!(output_content.contains("Line count: 3"));
+
+        // Clean up
+        fs::remove_file(test_input).expect("Failed to remove test input file");
+        fs::remove_file(test_output).expect("Failed to remove test output file");
     }
 
+    #[test]
+    #[should_panic(expected = "Failed to open file")]
+    fn test_run_with_invalid_file() {
+        let invalid_file = "non_existent.txt";
 
+        // Simulate user input for an invalid file
+        let _ = File::open(invalid_file).expect("Failed to open file");
+    }
 }

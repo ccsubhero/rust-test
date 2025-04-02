@@ -4,6 +4,8 @@
 
 use std::env;
 
+
+
 //实现基本函数，将调用的逻辑放在main.rs中
 pub fn run() {
 	let args: Vec<String> = env::args().collect();
@@ -23,37 +25,40 @@ pub fn run() {
 		}
 	}
 }
-
-//增加测试
 #[cfg(test)]
 mod tests {
+    use super::*;
 
     #[test]
-    fn test_main() {
-        use std::process::Command;
-
+    fn test_default_n() {
         let output = Command::new("cargo")
-            .args(&["run", "--", "15"])
+            .args(&["run", "--quiet", "--bin", "question1"])
             .output()
             .expect("Failed to execute process");
-
-        assert_eq!(
-            String::from_utf8_lossy(&output.stdout),
-            "1\n\
-            2\n\
-            3 Fizz\n\
-            4\n\
-            5 Buzz\n\
-            6 Fizz\n\
-            7\n\
-            8\n\
-            9 Fizz\n\
-            10 Buzz\n\
-            11\n\
-            12 Fizz\n\
-            13\n\
-            14\n\
-            15 FizzBuzz\n"
-        );
+        let expected = "1\n2\n3 Fizz\n4\n5 Buzz\n";
+        assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
     }
-}   
+
+    #[test]
+    fn test_custom_n() {
+        let output = Command::new("cargo")
+            .args(&["run", "--quiet", "--bin", "question1", "--", "15"])
+            .output()
+            .expect("Failed to execute process");
+        let expected = "1\n2\n3 Fizz\n4\n5 Buzz\n6 Fizz\n7\n8\n9 Fizz\n10 Buzz\n11\n12 Fizz\n13\n14\n15 FizzBuzz\n";
+        assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
+    }
+
+    #[test]
+    fn test_invalid_input() {
+        let output = Command::new("cargo")
+            .args(&["run", "--quiet", "--bin", "question1", "--", "invalid"])
+            .output()
+            .expect("Failed to execute process");
+        let expected = "1\n2\n3 Fizz\n4\n5 Buzz\n";
+        assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
+    }
+}
+
+
+
