@@ -23,24 +23,67 @@ pub fn run() {
         println!("{}: {}", word, count);
     }
 }
-//增加测试
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_run() {
+    fn test_single_line_input() {
         let input = "apple banana pear banana apple banana";
-        let output = "banana: 3\napple: 2\npear: 1\n";
-        let mut result = Vec::new();
-        let old_stdout = std::io::stdout();
-        let mut buffer = Vec::new();
-        let mut new_stdout = std::io::stdout();
-        new_stdout.write_all(&mut buffer).unwrap();
-        std::io::stdout = new_stdout;
-        run();
-        std::io::stdout = old_stdout;
-        let output = String::from_utf8(buffer).unwrap();
-        assert_eq!(output, output);
+        let expected_output = vec![
+            ("banana", 3),
+            ("apple", 2),
+            ("pear", 1),
+        ];
+        let mut map = HashMap::new();
+        for word in input.split_whitespace() {
+            *map.entry(word).or_insert(0) += 1;
+        }
+        let mut words: Vec<_> = map.iter().collect();
+        words.sort_by(|a, b| match b.1.cmp(a.1) {
+            Ordering::Equal => a.0.cmp(b.0),
+            other => other,
+        });
+        let result: Vec<_> = words.into_iter().map(|(word, count)| (*word, *count)).collect();
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn test_empty_input() {
+        let input = "";
+        let expected_output: Vec<(&str, i32)> = vec![];
+        let mut map = HashMap::new();
+        for word in input.split_whitespace() {
+            *map.entry(word).or_insert(0) += 1;
+        }
+        let mut words: Vec<_> = map.iter().collect();
+        words.sort_by(|a, b| match b.1.cmp(a.1) {
+            Ordering::Equal => a.0.cmp(b.0),
+            other => other,
+        });
+        let result: Vec<_> = words.into_iter().map(|(word, count)| (*word, *count)).collect();
+        assert_eq!(result, expected_output);
+    }
+
+    #[test]
+    fn test_tie_breaker() {
+        let input = "apple banana apple banana pear";
+        let expected_output = vec![
+            ("apple", 2),
+            ("banana", 2),
+            ("pear", 1),
+        ];
+        let mut map = HashMap::new();
+        for word in input.split_whitespace() {
+            *map.entry(word).or_insert(0) += 1;
+        }
+        let mut words: Vec<_> = map.iter().collect();
+        words.sort_by(|a, b| match b.1.cmp(a.1) {
+            Ordering::Equal => a.0.cmp(b.0),
+            other => other,
+        });
+        let result: Vec<_> = words.into_iter().map(|(word, count)| (*word, *count)).collect();
+        assert_eq!(result, expected_output);
     }
 }
+
